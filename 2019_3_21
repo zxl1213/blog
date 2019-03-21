@@ -57,3 +57,17 @@ Node * reverseList(List head){
     
     return tail;
 }
+void SlistPushBackPractice(Slist *slist, SlistDataType v){
+	Node *node = (Node*)malloc(sizeof(Node));
+	n->value = v;
+	n->next = NULL;
+	if (slist->first == NULL)
+		slist->next = n;
+	else{
+		Node *c = slist->first;
+		while (c->nest != NULL){
+			c = c->next;
+		}
+		c->next = n;
+	}
+}
