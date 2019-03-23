@@ -1,0 +1,54 @@
+//只是代码片段,不考虑形参的改变,不影响实参不改变
+//头插 head是链表的第一个节点,把node结点头插到head链表上
+void PushFront(Node* head,Node* node){
+//node 成为新的的第一个结点
+  node->next=head;
+  head=node;
+}
+//头删,不考虑链表为空的情况
+void PopFront(Node* head){
+  Node* second=head->next;
+  free(head);//面试题中可以不出现
+  head=second;
+}
+//找到链表的最后一个结点
+struct Node* FindLast(Node* head){
+  Node* cur=head;
+  while(c->next=NULL){
+    cur=cur->next;
+  }
+  return cur;
+}
+//尾插
+void PushBack(Node* head,Node* node){
+//分成两种情况讨论  1.链表中没有结点  2.链表有结点
+  node->next=NULL;
+  if(head==NULL){
+    head=node;
+  }else{
+  //先找到最后一个结点
+    Node* last=FindLast(head);
+	last->next=node;
+  }
+}
+//找倒数第二个结点
+struct Node* FindBeforlast(Node* head){
+  Node* cur=head;
+  while(cur->next->next!=NULL){
+    cur=cur->next;
+  }
+  return cur;
+}
+//尾删,不考虑链表中没有结点的情况
+void PopBack(Node* node){
+//分两种情况  1.链表中只有一个结点  2.链表中有超过一个节点
+  if(head->next==NULL){
+    free(head);
+	head=NULL;
+  }else{
+  //先找到倒数第二个结点
+    Node* beforelast=FindBeforlast(haed);
+	free(beforelast->next);
+	beforelast->next=NULL;
+  }
+}
