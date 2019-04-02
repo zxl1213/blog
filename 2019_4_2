@@ -1,0 +1,30 @@
+程序替换:替换进程所运行的程序,重新初始化虚拟地址空间,更新页表信息
+    为什么替换:让子进程完成其他功能
+	如何替换:exec程序族
+		execl
+		execlp
+		execle
+		execv
+		execvp
+		execve
+		execl和execv区别:参数的赋予是以指针数组赋予还是以不定参形式赋予
+		p:第一个参数是否需要给路径
+		e:环境变量是否需要自己替换
+        int execl(const char *path, const char *arg, ...);//不定参函数,参数赋予完毕,要以NULL结尾
+        int execlp(const char *file, const char *arg, ...);
+        int execle(const char *path, const char *arg,..., char * const envp[]);
+		程序替换就是,将进程的虚拟地址空间所映射在物理内存的区域进行改变,改变成另一个程序在内存中的位置,
+		更新页表信息,重新初始化虚拟地址空间初始化
+		为了让进程运行另一个程序,常用于子进程的替换
+自己实现minishall:体会shell原理以及程序替换的目的
+     shell处理流程:
+	while(1){
+	     1.获取标准输入
+		 2.对输入字符串进行解析
+		     获取程序名称和参数
+		 3.创建子进程
+			 1.程序替换-程序名称
+		 4.进程等待
+		 }
+scanf("%[^\n]%*c",buf);//
+//cd:shell内部命令,通过函数实现
