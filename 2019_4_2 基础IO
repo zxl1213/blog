@@ -1,0 +1,30 @@
+基础IO:
+	回顾标准库io接口:fopen fclose fwrite fseek
+		fopen:
+			r:只读方式打开文件
+			r+:读写方式打开文件
+			w:只写方式  打开文件,文件不存在创建,存在清空文件
+			w+:读写方式打开文件,文件不存在创建,存在清空文件
+			a:写追加方式打开文件,文件不存在创建,每次写入数据都是写入文件末尾
+			a+:可读
+		fgets  获取一行数据	
+		fprintf sprintf snprintf printf
+		sscanf	
+	标准库IO接口的操作句柄是FILE*--文件流指针
+		stdout stdin stderr FILE*
+	系统调用接口:
+		open(O_RDONLY,O_WRONLY,O_RDWR O_CREAT,O_TRUNC,O_APPEND)
+    write read close lseek
+    文件流指针,文件描述符,文件流指针包含文件描述符的操作对象
+    缓冲区,fflush(stdout)文件流指针维护的缓冲区
+    标准输入   标准输出   标准错误
+    stdin     stdout     stderr
+    0         1          2
+    文件描述符:系统调用接口open打开文件返回的正整数
+      进程打开文件后,使用file结构体描述文件,使用file *fd_array[]组织描述信息;然后将打开为念在数组中的下标返回给用户,作为句柄进行操作
+      fd_array这个数组在file_structz这个结构体中,file_struct结构体在pcd中\
+    文件描述符的最小操作对象
+    重定向:针对文件描述符的重定向,改变文件描述符这个下标所对应的文件描述信息
+    dup2(int oldfd,int newfd)  fd=open(file) dup2(fd,1);
+    minishell中实现重定向:获取字符串->解析是否重定向(> >>+文件名)
+	
