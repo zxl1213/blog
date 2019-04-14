@@ -19,6 +19,7 @@
 	生成动态库gcc -fPIC -c a.c -o a.o
 				.so动态库后缀  
 	生成静态库gcc -c b.c -o b.o         ar -cr b.o libmytest.so
+				.a静态库后缀
 		-fPIC产生位置无关代码   课后调研
 		--share生成共享库:gcc 
 		-L 指定库的搜索路径
@@ -32,12 +33,12 @@
 	库的使用(链接)
 	gcc a.c -o main -lmytest 报错,找不到库(链接时找不到库----库的查找路径)
 	库文件的默认路径/lib64    /usr/lib64
-	设置环境变量:LIBRARY_PATH=.(库的链接路径)
+	设置环境变量:LIBRARY_PATH.(库的链接路径)
 	使用选项:-L
 	
 	因为gcc默认是动态链接--因此默认使用动态库生成可执行程序
 	./main 运行报错----找不到库(运行时找不到库----库的加载路径)
 		库文件的默认路径/lib64    /usr/lib64
-	设置环境变量:LIBRARY_PATH=.(库的运行加载路径)
+	设置环境变量:LD_LIBRARY_PATH.(库的运行加载路径)
 	链接静态库生成可执行程序并不使用static ,而是将静态库放到指定路径下,直接gcc -L链接静态库,生成动态库
 	gcc a.c -o main -L/.mytest -static   (所有库都是静态库)
