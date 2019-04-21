@@ -1,0 +1,78 @@
+信号:(#include <signal.h>)
+	基本认识:软件中断--通知事情的发生(打断当前阻塞操作,处理事情)
+		通知事件的发生---
+		信号的不同种类:每个信号都对应不同的事件
+	linux下信号的种类:
+		62种信号(kill -l,查看信号种类):1-31,每个都有各自对应的事件    非可靠信号/非实时信号
+	                                   34-64,后续添加的信号           可靠信号/实时信号(是否立即处理)
+	信号的生命周期:产生->注册->注销->处理       阻塞    
+		信号的产生:
+			硬件:ctrl+c,ctrl+|,ctrl+z     kill -9
+			软件:kill -signo pid命令
+				kill()
+				raise()给调用进程
+				abort()
+				alarm()定时器
+				程序异常
+				core dumped--核心转储--程序异常退出时保存程序运行信息(core.pid)--事后调试
+				core dumped--默认关闭--占磁盘资源,安全性考虑
+				ulimit -a查看core dumped是否开启
+				ulimit -c 1024设置核心转储文件大小,开启核心转储
+				运行程序gdb./loop-->core-file core.pid--> bt
+		信号的注册:
+			在进程中的注册,修改pending未决信号集合(位图)中对应信号位+添加信号sigqueue节点
+			task_struct->struct sigpending pending->sigset_t signal  
+			非可靠信号注册:判断pending信号集合位图相应位是否为1;若为0,为信号阻止sigqueue节点
+			             添加到链表中,并且pending位图置1;若为1(信号已经注册过还没被处理),
+						 则什么都不做(等于丢弃)(事件丢失),否则,修改位图,添加节点
+			可靠信号注册:不管位图是否为1,阻止节点,添加到链表中,并且位图置1(信号不会被丢弃)
+		信号在进程中注销:(信号处理之前),删除节点,修改位图
+			非可靠信号:因为非可靠信号的信号节点只有一个,因此删除节点,位图直接置0
+			可靠信号:因为可靠信号的信号节点有可能会有多个,若还有相同信号节点,则位图依然置1,否则置0
+		信号的处理:
+			默认SIG_DEL  signal(int signum,sighandler_t handle)
+			忽略SIG_IGN  修改信号的处理方式
+			自定义 
+				typedef void(*sighandler_t)(int)
+				sigal(signo,sigcb)    sigaction(signo,struct sigaction new,old)
+				task_struct->struct sighand_struct->struct k_sifactionaction[_NSIG]
+		信号自定义处理方式的捕捉流程
+			用户态切换到内核态运行,完毕后准备从内核态切换到用户态运行的时候,去处理信号,若信号为默认/忽略处理
+			,则在内核中直接完成,但如果是自定义处理,则需要返回用户态执行信号回调函数,完毕后回内核态..没有信号
+			则返回程序主流程
+		信号的阻塞:暂时阻止信号被递达--信号依然可以注册,但是只是暂时不处理,解除阻塞之后才会处理
+			信号的递达:动作-信号的处理
+			信号的未决:状态-信号冲产生到处理之前所处的状态
+			过程:在pcb的blocked-信号阻塞集合中标记那些信号,
+				到来之后暂时不处理(将blocked位图集合中对应的位置置1,表示阻塞这个信号)
+			信号SIGKILL-9SIGSTOP-19无法被阻塞,无法自定义,无法被忽略
+			接口:sigprocmask  对信号阻塞集合进行处理,阻塞/解除阻塞信号 
+					SIG_BLOCK    block=block|set
+					SIG_UNBLOCK  block=block&~set
+					SIG_SETMASK  block=mask
+			     sigemptyset  清空信号集合
+			     sigfillset   像集合中添加所有信号
+				 sigaddset    向集合中移除执行信号
+				 sigismember  判断信号是否在集合中
+				 sigdelset    从集合中移除执行信号
+				 sigpending   获取未决信号
+				 sigsuspend   临时使用传入的mask替换block(阻塞)集合,陷入休眠,被唤醒后阻塞集合还原(原子操作)
+	竟态条件:因为运行时序造成的数据竞争--导致数据二义性
+		函数中所完成的操作并非原子操作---并且操作的数据是一个全局数据
+		如果一个函数中操作了全局性数据,并且这个操作不是原子性操作,并且这个操作不受保护;
+		则这个函数是一个不可重入函数
+		不可重入函数:不能在多个时序中重复调用(重复调用有可能造成数据二义性)
+			malloc/free
+		可重入函数:在多个时序的运行中重复调用,不会造成异常影响(数据二义性问题)
+		~自主实现sleep函数
+			可中断睡眠会被信号打断
+	voletile:保持内存可见性---每次操作变量都需要从内存中获取,防止编译器过度优化
+	!gcc编译上次未成功操作
+	gcc -O2代码优化
+	SIGCHID:子进程退出,操作系统通知父进程的信号
+	自定义SIGCHID信号处理方式sigcb,当子进程退出,操作系统发送信号给父进程,直接触发信号信号回调sigcb,
+	用户主要在sigcb中去调用wait/waitpid就可处理子进程的退出
+	SIGCHID是一个非可靠信号,假如有多个子进程同时退出,则有可能造成事件丢失,导致sigcb只被回调一次,只处理一个子进程
+	;因此在sigcb中用户需要循环非阻塞处理子进程退出,直到没有没有退出的子进程
+		while(waitpid(-1,NULL,WONOHANG)>0)//因为>0表示有子进程退出
+	必须要非阻塞,否则没有子进程退出时,waitpid将阻塞程序无法回到主控函数
