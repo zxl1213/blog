@@ -29,12 +29,12 @@
 		信号在进程中注销:(信号处理之前),删除节点,修改位图
 			非可靠信号:因为非可靠信号的信号节点只有一个,因此删除节点,位图直接置0
 			可靠信号:因为可靠信号的信号节点有可能会有多个,若还有相同信号节点,则位图依然置1,否则置0
-		信号的处理:
+		信号的处理(信号递达):UNIX环境高级编程---signal默认处理方式
 			默认SIG_DEL  signal(int signum,sighandler_t handle)
 			忽略SIG_IGN  修改信号的处理方式
 			自定义 
 				typedef void(*sighandler_t)(int)
-				sigal(signo,sigcb)    sigaction(signo,struct sigaction new,old)
+				sigal(signo,sigcb)    sigaction(signo,struct sigaction *act,struct sigaction*old)
 				task_struct->struct sighand_struct->struct k_sifactionaction[_NSIG]
 		信号自定义处理方式的捕捉流程
 			用户态切换到内核态运行,完毕后准备从内核态切换到用户态运行的时候,去处理信号,若信号为默认/忽略处理
